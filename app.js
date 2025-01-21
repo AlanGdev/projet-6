@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bookRouter = require('./routes/book');
+const userRouter = require('./routes/user');
 
 const app = express();
 mongoose
@@ -23,8 +25,10 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.use((req, res) => {
+/*app.use((req, res) => {
 	res.json({ message: 'votre requête a bien été reçue' });
-});
+});*/
+app.use('/api/books/', bookRouter);
+app.use('/api/auth', userRouter);
 
 module.exports = app;
