@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bookRouter = require('./routes/book');
 const userRouter = require('./routes/user');
+const path = require('path');
 
 const app = express();
 mongoose
@@ -11,6 +12,8 @@ mongoose
 	)
 	.then(() => console.log('Connexion à MongoDB réussie'))
 	.catch(() => console.log('Connexion à MonDB échouée'));
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(express.json());
 
 app.use((req, res, next) => {
