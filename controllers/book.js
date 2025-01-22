@@ -1,4 +1,5 @@
 const Book = require('../models/book');
+const fs = require('fs');
 
 exports.getBooks = (req, res) => {
 	Book.find()
@@ -62,7 +63,24 @@ exports.modifyBook = (req, res, next) => {
 		.catch((error) => res.status(500).json(error));
 };
 exports.deleteBook = (req, res) => {
-	res.status(201).json({ message: 'Requête PUT pour fonction deleteBook' });
+	//res.status(201).json({ message: 'Requête PUT pour fonction deleteBook' });
+	Book.findOne({
+		_id: req.params.id,
+	})
+		.then((book) => {
+			if (book.userId != req.auth.userId) {
+				res.status(400).json({ message: 'Not authorized' });
+			} else {
+				const filename = book.imageUrl.split('/images/')[1];
+				fs.unlink(`images/${filename}`, () => {
+					book
+						.deleteOne({ _id: req.params.id })
+						.then(() => res.status(200).json({ message: 'book deleted' }))
+						.catch((error) => res.status(401).json(error));
+				});
+			}
+		})
+		.catch((error) => res.status(500).json(error));
 };
 exports.rateBook = (req, res) => {
 	res.status(201).json({ message: 'Requête POST pour fonction rateBook' });
