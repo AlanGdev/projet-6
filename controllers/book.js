@@ -20,10 +20,16 @@ exports.createBook = (req, res, next) => {
 	console.log(req.body.book);
 	const bookObject = JSON.parse(req.body.book);
 	delete bookObject.userId;
+	console.log(bookObject.ratings)
 	const book = new Book({
 		...bookObject,
 		userId: req.auth.userId,
 		imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+		ratings: [{
+			userId:req.auth.userId,
+			rating:bookObject.ratings[0].grade
+		}],
+		averageRating:bookObject.ratings[0].grade
 	});
 	book
 		.save()
@@ -37,7 +43,6 @@ exports.createBook = (req, res, next) => {
 		);
 };
 exports.modifyBook = (req, res, next) => {
-	//res.status(201).json({ message: 'Requête PUT pour fonction modifyBook' });
 	const bookObject = req.file
 		? {
 				...JSON.parse(req.body.book),
@@ -63,7 +68,6 @@ exports.modifyBook = (req, res, next) => {
 		.catch((error) => res.status(500).json(error));
 };
 exports.deleteBook = (req, res) => {
-	//res.status(201).json({ message: 'Requête PUT pour fonction deleteBook' });
 	Book.findOne({
 		_id: req.params.id,
 	})
@@ -83,5 +87,7 @@ exports.deleteBook = (req, res) => {
 		.catch((error) => res.status(500).json(error));
 };
 exports.rateBook = (req, res) => {
+	console.log(req.params)
 	res.status(201).json({ message: 'Requête POST pour fonction rateBook' });
+	//const book=Book.finOne({_id:req.body.})
 };
