@@ -14,7 +14,15 @@ exports.getOneBook = (req, res, next) => {
 		.catch((error) => res.status(500).json(error));
 };
 exports.getBestRating = (req, res) => {
-	res.status(201).json({ message: 'Requête Get pour fonction getBestRating' });
+	//res.status(201).json({ message: 'Requête Get pour fonction getBestRating' });
+	Book.find()
+	.then(books=>{books.sort((a,b)=>b.averageRating-a.averageRating	)
+		//books.map((book)=>{console.log(book.title + book.averageRating)})
+		const bestrating=books.slice(0,3)
+		console.log(bestrating)
+		res.status(201).json(bestrating)
+	}
+)	
 };
 exports.createBook = (req, res, next) => {
 	console.log(req.body.book);
@@ -27,7 +35,7 @@ exports.createBook = (req, res, next) => {
 		imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
 		ratings: [{
 			userId:req.auth.userId,
-			rating:bookObject.ratings[0].grade
+			grade:bookObject.ratings[0].grade
 		}],
 		averageRating:bookObject.ratings[0].grade
 	});
@@ -61,7 +69,7 @@ exports.modifyBook = (req, res, next) => {
 					},
 					{ ...bookObject, _id: req.params.id },
 				)
-					.then(() => res.status(201).json({ message: 'book modified' }))
+					.then(res.status(201).json({ message: 'book modified' }))
 					.catch((error) => res.status(400).json({ error }));
 			}
 		})
@@ -87,7 +95,37 @@ exports.deleteBook = (req, res) => {
 		.catch((error) => res.status(500).json(error));
 };
 exports.rateBook = (req, res) => {
-	console.log(req.params)
-	res.status(201).json({ message: 'Requête POST pour fonction rateBook' });
-	//const book=Book.finOne({_id:req.body.})
-};
+	console.log(`fonction rateBook: req.params:`)
+	//console.log(req.params)
+	//console.log('req.body')
+	//console.log(req.body)
+	//console.log('authorization')
+	//console.log(req.auth)
+
+	const book=Book.findOne({_id:req.params.id})
+	.then(book=>{
+		//console.log(book)
+		const rating={userId:req.body.userId,
+			grade:req.body.rating
+		}
+		//console.log(book)
+		//console.log(rating)
+		const ratings=book.ratings
+		ratings.push(rating)
+		//console.log(rating)
+		const averageRating=ratings.reduce((acc, current) => {
+			return acc + (current.grade);
+		},0)/ratings.length
+		//console.log(averageRating)
+		Book.updateOne({
+			_id:req.params.id},{_id:req.params.id,
+			ratings:ratings,
+		averageRating:averageRating})
+		.then(()=>{
+			//console.log(book)
+			res.status(201).json(book)})
+		}
+
+	)
+}
+
