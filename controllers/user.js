@@ -3,7 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.userSignup = (req, res, next) => {
-	//res.status(201).json({ message: 'requête POST sur fonction userSignup'
+	if (!req.body.email || !req.body.password) {
+		return res.status(400).json({ error: 'email ou mot de passe manquant' });
+	}
 	bcrypt
 		.hash(req.body.password, 10)
 		.then((hash) => {
@@ -13,30 +15,25 @@ exports.userSignup = (req, res, next) => {
 			});
 			user
 				.save()
-				.then(() => res.status(201).json({ message: 'Utilisateur créé!' }))
-				.catch((error) => res.status(404).json({ error }));
+				.then(() => res.status(201).json({ message: 'utilisateur créé!' }))
+				.catch((error) => res.status(400).json({ message: 'requête rejetée' }));
 		})
-		.catch((error) => res.status(500).json({ error }));
+		.catch((error) => res.status(500).json({ message: 'erreur serveur' }));
 };
 
 exports.userLogin = (req, res, next) => {
-	//res.status(201).json({ message: 'requête POST sur fonction userLogin' });
 	User.findOne({ email: req.body.email })
 		.then((user) => {
 			if (!user) {
-				return res
-					.status(401)
-					.json({ message: 'Paire login / mot de passe incorrecte' });
+				return res.status(400).json({ message: 'identifiants incorrects' });
 			}
 			bcrypt
 				.compare(req.body.password, user.password)
 				.then((validation) => {
 					if (!validation) {
-						return res
-							.status(401)
-							.json({ message: 'Paire login / mot de passe incorrecte' });
+						return res.status(400).json({ message: 'identifiants incorrects' });
 					}
-					res.status(201).json({
+					res.status(200).json({
 						userId: user._id,
 						token: jwt.sign(
 							{
@@ -47,7 +44,7 @@ exports.userLogin = (req, res, next) => {
 						),
 					});
 				})
-				.catch((error) => res.status(500).json({ error }));
+				.catch((error) => res.status(500).json({ message: 'erreur serveur' }));
 		})
-		.catch((error) => res.status(404).json({ message: 'user non trouvé' }));
+		.catch((error) => res.status(500).json({ message: 'erreur serveur' }));
 };
