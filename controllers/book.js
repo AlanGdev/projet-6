@@ -75,13 +75,27 @@ exports.modifyBook = (req, res, next) => {
 				if (book.userId != req.auth.userId) {
 					return res.status(400).json({ error: 'requête invalide' });
 				} else {
+					if (req.file) {
+						const oldFilename = book.imageUrl.split(`images/`)[1];
+						fs.unlink(`images/${oldFilename}`, (err) => {
+							console.log('erreur lors de la suppression');
+						});
+					}
 					Book.updateOne(
 						{
 							_id: req.params.id,
 						},
 						{ ...bookObject, _id: req.params.id },
 					)
-						.then(() => res.status(200).json({ message: 'livre modifié' }))
+						.then(() => {
+							return Book.findOne({ _id: req.params.id });
+						})
+						.then((updatedBook) => {
+							if (!updatedBook) {
+								return res.status(400).json({ message: 'requête invalide' });
+							}
+							res.status(200).json({ message: 'livre modifié' });
+						})
 						.catch((error) =>
 							res.status(500).json({ error: 'erreur serveur' }),
 						);
