@@ -28,7 +28,6 @@ exports.getBestRating = (req, res) => {
 		.catch((error) => res.status(500).json({ error: 'erreur serveur' }));
 };
 exports.createBook = (req, res, next) => {
-	console.log(req.body);
 	if (!req.body.book) {
 		return res.status(400).json({ error: 'requête invalide' });
 	}
