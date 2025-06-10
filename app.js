@@ -3,15 +3,17 @@ const mongoose = require('mongoose');
 const bookRouter = require('./routes/book');
 const userRouter = require('./routes/user');
 const path = require('path');
+require ('dotenv').config()
+
 
 const app = express();
 mongoose
 	.connect(
-		`${process.env.MONGO_DB_URL}`,
+		process.env.MONGO_DB_URL,
 		{ useNewUrlParser: true, useUnifiedTopology: true },
 	)
 	.then(() => console.log('Connexion à MongoDB réussie'))
-	.catch(() => console.log('Connexion à MonDB échouée'));
+	.catch(() => console.error('Connexion à MonDB échouée'));
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(express.json());
